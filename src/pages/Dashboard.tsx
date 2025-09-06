@@ -59,7 +59,7 @@ const projects = [
 const recentActivity = [
   { id: 1, text: "John completed 'Design wireframes' task", time: "2 hours ago" },
   { id: 2, text: "Sarah added new comment to Mobile App project", time: "4 hours ago" },
-  { id: 3, text: "Mike assigned 'API Integration' to you", time: "6 hours ago" }
+  { id: 3, text: "Mike assigned 'UI Integration' to you", time: "6 hours ago" }
 ];
 
 const Dashboard = () => {

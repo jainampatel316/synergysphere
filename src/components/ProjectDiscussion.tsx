@@ -36,7 +36,7 @@ const mockMessages: Message[] = [
   {
     id: 3,
     author: "Mike Johnson",
-    content: "I've completed the API integration for user authentication. Ready for testing.",
+    content: "I've completed the frontend integration for user authentication. Ready for testing.",
     timestamp: "2024-01-16 15:20",
     avatar: ""
   }

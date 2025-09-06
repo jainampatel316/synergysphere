@@ -34,12 +34,12 @@ const projectData = {
       ],
       inProgress: [
         { id: 3, title: "Create component library", assignee: "Lisa Chen", priority: "high" as const, dueDate: "2024-01-18" },
-        { id: 4, title: "API integration for user data", assignee: "Mike Johnson", priority: "medium" as const, dueDate: "2024-01-22" }
+        { id: 4, title: "Frontend integration for user data", assignee: "Mike Johnson", priority: "medium" as const, dueDate: "2024-01-22" }
       ],
       done: [
         { id: 5, title: "Project setup and configuration", assignee: "John Doe", priority: "high" as const, dueDate: "2024-01-10" },
         { id: 6, title: "Design system documentation", assignee: "Sarah Wilson", priority: "low" as const, dueDate: "2024-01-12" },
-        { id: 7, title: "Database schema design", assignee: "Mike Johnson", priority: "medium" as const, dueDate: "2024-01-15" }
+        { id: 7, title: "Data structure design", assignee: "Mike Johnson", priority: "medium" as const, dueDate: "2024-01-15" }
       ]
     }
   }

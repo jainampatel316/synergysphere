@@ -118,7 +118,7 @@ const CreateTask = () => {
                   <SelectContent>
                     <SelectItem value="website">Website Redesign</SelectItem>
                     <SelectItem value="mobile">Mobile App</SelectItem>
-                    <SelectItem value="api">API Development</SelectItem>
+                    <SelectItem value="frontend">Frontend Development</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
