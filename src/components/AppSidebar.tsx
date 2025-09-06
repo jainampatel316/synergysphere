@@ -60,7 +60,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
-                      <item.icon className="mr-2 h-4 w-4" />
+                      <item.icon className={`h-4 w-4 ${collapsed ? "mx-auto" : "mr-2"}`} />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -71,8 +71,8 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Theme Toggle and User Profile */}
-        <div className="mt-auto p-4 space-y-2">
-          <div className="flex items-center space-x-2">
+        <div className={`mt-auto p-2 space-y-2 ${collapsed ? "flex flex-col items-center" : ""}`}>
+          <div className={`flex ${collapsed ? "flex-col space-y-2" : "items-center space-x-2"}`}>
             <Button
               variant="ghost" 
               size="icon"
@@ -86,9 +86,14 @@ export function AppSidebar() {
                 <Settings className="h-4 w-4" />
               </Button>
             )}
+            {collapsed && (
+              <Button variant="ghost" size="icon" className="w-8 h-8">
+                <Settings className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           
-          <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50">
+          <div className={`flex ${collapsed ? "justify-center" : "items-center space-x-2"} p-2 rounded-lg hover:bg-muted/50`}>
             <Avatar className="w-8 h-8">
               <AvatarImage src="" />
               <AvatarFallback className="text-xs">TU</AvatarFallback>
