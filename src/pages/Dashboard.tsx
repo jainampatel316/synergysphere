@@ -1,44 +1,58 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, Calendar, Users, BarChart3, Bell, Search, Settings } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProjectCard } from "@/components/ProjectCard";
+import { Plus, Calendar, Users, BarChart3 } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data
+// Mock data following wireframe specifications
 const projects = [
   {
-    id: 1,
-    name: "Website Redesign",
-    description: "Complete overhaul of company website",
-    progress: 75,
-    members: 4,
-    tasks: { total: 24, completed: 18 },
-    status: "active",
-    dueDate: "2024-02-15"
+    id: "1",
+    title: "RD Services",
+    tags: [
+      { label: "Services", color: "green" },
+      { label: "Customer Care", color: "red" }
+    ],
+    image: "/placeholder-project.jpg",
+    deadline: "21/03/22",
+    taskCount: 10,
+    manager: {
+      name: "John Doe",
+      avatar: ""
+    }
   },
   {
-    id: 2,
-    name: "Mobile App Development",
-    description: "iOS and Android app for customer portal",
-    progress: 45,
-    members: 6,
-    tasks: { total: 32, completed: 14 },
-    status: "active",
-    dueDate: "2024-03-30"
+    id: "2", 
+    title: "Mobile App Development",
+    tags: [
+      { label: "Development", color: "green" },
+      { label: "Mobile", color: "green" }
+    ],
+    image: "/placeholder-project.jpg",
+    deadline: "15/04/22",
+    taskCount: 15,
+    manager: {
+      name: "Jane Smith", 
+      avatar: ""
+    }
   },
   {
-    id: 3,
-    name: "Marketing Campaign",
-    description: "Q1 product launch marketing strategy",
-    progress: 90,
-    members: 3,
-    tasks: { total: 15, completed: 13 },
-    status: "review",
-    dueDate: "2024-01-31"
+    id: "3",
+    title: "Marketing Campaign",
+    tags: [
+      { label: "Marketing", color: "green" },
+      { label: "Urgent", color: "red" }
+    ],
+    image: "/placeholder-project.jpg", 
+    deadline: "31/01/22",
+    taskCount: 8,
+    manager: {
+      name: "Mike Johnson",
+      avatar: ""
+    }
   }
 ];
 
@@ -50,20 +64,26 @@ const recentActivity = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active": return "bg-info text-info-foreground";
-      case "review": return "bg-warning text-warning-foreground";
-      case "completed": return "bg-success text-success-foreground";
-      default: return "bg-muted text-muted-foreground";
-    }
+  const handleEditProject = (id: string) => {
+    toast({
+      title: "Edit Project",
+      description: `Editing project ${id}`,
+    });
+  };
+
+  const handleDeleteProject = (id: string) => {
+    toast({
+      title: "Delete Project", 
+      description: `Project ${id} deleted`,
+      variant: "destructive",
+    });
   };
 
   const filteredProjects = projects.filter(project =>
-    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    project.description.toLowerCase().includes(searchQuery.toLowerCase())
+    project.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -133,52 +153,15 @@ const Dashboard = () => {
               </Button>
             </div>
 
-            <div className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProjects.map((project) => (
-                <Card 
-                  key={project.id} 
-                  className="hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-primary"
-                  onClick={() => navigate(`/project/${project.id}`)}
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <CardDescription>{project.description}</CardDescription>
-                      </div>
-                      <Badge className={getStatusColor(project.status)}>
-                        {project.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Progress</span>
-                          <span>{project.progress}%</span>
-                        </div>
-                        <Progress value={project.progress} className="h-2" />
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-4">
-                          <span className="flex items-center">
-                            <Users className="h-4 w-4 mr-1" />
-                            {project.members} members
-                          </span>
-                          <span className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            Due {project.dueDate}
-                          </span>
-                        </div>
-                        <span>
-                          {project.tasks.completed}/{project.tasks.total} tasks
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div key={project.id} onClick={() => navigate(`/project/${project.id}`)} className="cursor-pointer">
+                  <ProjectCard
+                    {...project}
+                    onEdit={handleEditProject}
+                    onDelete={handleDeleteProject}
+                  />
+                </div>
               ))}
             </div>
           </div>

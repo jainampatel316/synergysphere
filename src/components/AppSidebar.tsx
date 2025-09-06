@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { 
   Folder, 
@@ -6,7 +6,8 @@ import {
   Settings, 
   Sun, 
   Moon,
-  User
+  User,
+  LogOut
 } from "lucide-react";
 import {
   Sidebar,
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 
 const navigation = [
   { title: "Projects", url: "/dashboard", icon: Folder },
@@ -34,6 +36,8 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -41,6 +45,14 @@ export function AppSidebar() {
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleLogout = () => {
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully.",
+    });
+    navigate('/');
   };
 
   return (
@@ -85,6 +97,15 @@ export function AppSidebar() {
                 <Settings className="h-4 w-4" />
               </Button>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
             {collapsed && (
               <Button variant="ghost" size="icon" className="w-8 h-8">
                 <Settings className="h-4 w-4" />
