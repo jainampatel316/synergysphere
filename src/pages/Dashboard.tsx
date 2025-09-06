@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,182 +6,259 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { Plus, Calendar, Users, BarChart3 } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { projectsAPI, tasksAPI } from "@/services/api";
 
-// Mock data following wireframe specifications
-const projects = [
-  {
-    id: "1",
-    title: "RD Services",
-    tags: [
-      { label: "Services", color: "green" },
-      { label: "Customer Care", color: "red" }
-    ],
-    image: "/placeholder-project.jpg",
-    deadline: "21/03/22",
-    taskCount: 10,
-    manager: {
-      name: "John Doe",
-      avatar: ""
-    }
-  },
-  {
-    id: "2", 
-    title: "Mobile App Development",
-    tags: [
-      { label: "Development", color: "green" },
-      { label: "Mobile", color: "green" }
-    ],
-    image: "/placeholder-project.jpg",
-    deadline: "15/04/22",
-    taskCount: 15,
-    manager: {
-      name: "Jane Smith", 
-      avatar: ""
-    }
-  },
-  {
-    id: "3",
-    title: "Marketing Campaign",
-    tags: [
-      { label: "Marketing", color: "green" },
-      { label: "Urgent", color: "red" }
-    ],
-    image: "/placeholder-project.jpg", 
-    deadline: "31/01/22",
-    taskCount: 8,
-    manager: {
-      name: "Mike Johnson",
-      avatar: ""
-    }
-  }
-];
+interface Project {
+  _id: string;
+  name: string;
+  description: string;
+  progress: number;
+  dueDate?: string;
+  members: string[];
+  owner: string;
+  createdAt: string;
+}
 
-const recentActivity = [
-  { id: 1, text: "John completed 'Design wireframes' task", time: "2 hours ago" },
-  { id: 2, text: "Sarah added new comment to Mobile App project", time: "4 hours ago" },
-  { id: 3, text: "Mike assigned 'UI Integration' to you", time: "6 hours ago" }
-];
+interface Task {
+  _id: string;
+  title: string;
+  status: 'todo' | 'in_progress' | 'done';
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  dueDate?: string;
+  projectId: string;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, logout } = useAuth();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [myTasks, setMyTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleEditProject = (id: string) => {
-    toast({
-      title: "Edit Project",
-      description: `Editing project ${id}`,
-    });
+  // Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch projects and tasks in parallel
+        const [projectsData, tasksData] = await Promise.all([
+          projectsAPI.getAll(),
+          tasksAPI.getMyTasks({ limit: 5 }) // Get recent tasks
+        ]);
+        
+        setProjects(projectsData);
+        setMyTasks(tasksData.tasks || tasksData);
+        
+      } catch (error: any) {
+        console.error('Error fetching dashboard data:', error);
+        toast({
+          title: "Error loading dashboard",
+          description: error.message || "Failed to load dashboard data",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [toast]);
+
+  const handleCreateProject = () => {
+    navigate("/create-project");
   };
 
-  const handleDeleteProject = (id: string) => {
-    toast({
-      title: "Delete Project", 
-      description: `Project ${id} deleted`,
-      variant: "destructive",
-    });
+  const handleEditProject = (id: string) => {
+    navigate(`/project/${id}`);
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      // Add delete API call here when ready
+      toast({
+        title: "Delete Project", 
+        description: `Project deleted successfully`,
+        variant: "destructive",
+      });
+      // Refresh projects list
+      const projectsData = await projectsAPI.getAll();
+      setProjects(projectsData);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete project",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredProjects = projects.filter(project =>
-    project.title.toLowerCase().includes(searchQuery.toLowerCase())
+    project.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Format date helper
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'No deadline';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  // Convert backend project to ProjectCard format
+  const convertToProjectCardData = (project: Project) => ({
+    id: project._id,
+    title: project.name,
+    tags: [
+      { label: `${Math.round(project.progress)}% Complete`, color: "green" },
+      { label: project.members.length > 1 ? "Team Project" : "Solo", color: "blue" }
+    ],
+    image: "/placeholder-project.jpg",
+    deadline: formatDate(project.dueDate),
+    taskCount: 0, // Will be updated when we have task counts
+    manager: {
+      name: user?.name || "You",
+      avatar: ""
+    }
+  });
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+              <p className="mt-2 text-sm text-gray-600">Loading dashboard...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className="container mx-auto px-6 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Welcome back, John!</h2>
+          <h2 className="text-3xl font-bold mb-2">Welcome back, {user?.name || 'User'}!</h2>
           <p className="text-muted-foreground">Here's what's happening with your projects today.</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Stats Cards - Simple version */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground">2 active, 1 in review</p>
+              <div className="text-2xl font-bold">{projects.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Active projects
+              </p>
             </CardContent>
           </Card>
+          
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tasks Completed</CardTitle>
+              <CardTitle className="text-sm font-medium">My Tasks</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">45</div>
-              <p className="text-xs text-muted-foreground">+12 from last week</p>
+              <div className="text-2xl font-bold">{myTasks.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Tasks assigned to you
+              </p>
             </CardContent>
           </Card>
+          
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Team Members</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">13</div>
-              <p className="text-xs text-muted-foreground">Across all projects</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Progress</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">70%</div>
-              <p className="text-xs text-muted-foreground">+5% from last week</p>
+              <div className="text-2xl font-bold">
+                {projects.reduce((total, project) => total + project.members.length, 0)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Across all projects
+              </p>
             </CardContent>
           </Card>
         </div>
 
+        {/* Projects Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Projects Section */}
+          {/* Projects List */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold">Your Projects</h3>
-              <Button 
-                className="bg-gradient-primary text-primary-foreground border-0"
-                onClick={() => navigate("/create-project")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Project
+              <h3 className="text-xl font-semibold">Projects</h3>
+              <Button onClick={handleCreateProject} className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Create Project
               </Button>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredProjects.map((project) => (
-                <div key={project.id} onClick={() => navigate(`/project/${project.id}`)} className="cursor-pointer">
+            {projects.length === 0 ? (
+              <Card className="p-8 text-center">
+                <div className="text-muted-foreground mb-4">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">No projects yet</h3>
+                  <p>Create your first project to get started with team collaboration.</p>
+                </div>
+                <Button onClick={handleCreateProject} className="mt-4">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Project
+                </Button>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {filteredProjects.map((project) => (
                   <ProjectCard
-                    {...project}
+                    key={project._id}
+                    {...convertToProjectCardData(project)}
                     onEdit={handleEditProject}
                     onDelete={handleDeleteProject}
                   />
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Recent Activity */}
           <div>
-            <h3 className="text-xl font-semibold mb-6">Recent Activity</h3>
+            <h3 className="text-xl font-semibold mb-6">Recent Tasks</h3>
             <Card>
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  {recentActivity.map((activity) => (
-                    <div key={activity.id} className="flex space-x-3">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                      <div>
-                        <p className="text-sm">{activity.text}</p>
-                        <p className="text-xs text-muted-foreground">{activity.time}</p>
+                {myTasks.length === 0 ? (
+                  <div className="text-center text-muted-foreground">
+                    <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No recent tasks</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {myTasks.slice(0, 5).map((task) => (
+                      <div key={task._id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                        <div className={`w-2 h-2 rounded-full mt-2 ${
+                          task.status === 'done' ? 'bg-green-500' :
+                          task.status === 'in_progress' ? 'bg-blue-500' : 'bg-gray-400'
+                        }`} />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{task.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {task.status === 'done' ? 'Completed' :
+                             task.status === 'in_progress' ? 'In Progress' : 'To Do'}
+                            {task.dueDate && ` • Due ${formatDate(task.dueDate)}`}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -39,10 +39,9 @@ export function TaskCard({
           {tags.map((tag, index) => (
             <Badge
               key={index}
-              variant="secondary"
-              className={`text-xs ${
-                tag.color === 'green' 
-                  ? 'bg-success/10 text-success border-success/20' 
+              className={`text-xs border-transparent ${
+                tag.color === 'green'
+                  ? 'bg-success/10 text-success border-success/20'
                   : tag.color === 'red'
                   ? 'bg-destructive/10 text-destructive border-destructive/20'
                   : 'bg-warning/10 text-warning border-warning/20'
@@ -67,7 +66,10 @@ export function TaskCard({
           </h3>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                className="h-8 w-8 p-0 flex items-center justify-center hover:bg-accent rounded-md"
+                aria-label="Task actions"
+              >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

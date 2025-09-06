@@ -7,25 +7,69 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, register, isAuthenticated, loading } = useAuth();
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    loginEmail: '',
+    loginPassword: ''
+  });
 
-  const handleAuth = async (e: React.FormEvent, type: 'login' | 'signup') => {
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate authentication
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await login(formData.loginEmail, formData.loginPassword);
       toast({
-        title: type === 'login' ? "Welcome back!" : "Account created!",
-        description: type === 'login' ? "You've been logged in successfully." : "Your account has been created successfully.",
+        title: "Welcome back!",
+        description: "You've been logged in successfully.",
       });
       navigate('/dashboard');
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      await register(fullName, formData.email, formData.password);
+      toast({
+        title: "Account created!",
+        description: "Please check your email to confirm your account before signing in.",
+      });
+      // Clear form
+      setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', password: '' }));
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Please try again with different credentials.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -73,13 +117,15 @@ const Auth = () => {
                 </TabsList>
                 
                 <TabsContent value="login" className="space-y-4">
-                  <form onSubmit={(e) => handleAuth(e, 'login')} className="space-y-4">
+                  <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
                       <Input
                         id="email"
                         type="email"
                         placeholder="Enter your email"
+                        value={formData.loginEmail}
+                        onChange={(e) => handleInputChange('loginEmail', e.target.value)}
                         required
                       />
                     </div>
@@ -89,27 +135,31 @@ const Auth = () => {
                         id="password"
                         type="password"
                         placeholder="Enter your password"
+                        value={formData.loginPassword}
+                        onChange={(e) => handleInputChange('loginPassword', e.target.value)}
                         required
                       />
                     </div>
                     <Button 
                       type="submit" 
                       className="w-full bg-gradient-primary border-0 text-primary-foreground"
-                      disabled={isLoading}
+                      disabled={loading}
                     >
-                      {isLoading ? "Signing in..." : "Sign In"}
+                      {loading ? "Signing in..." : "Sign In"}
                     </Button>
                   </form>
                 </TabsContent>
                 
                 <TabsContent value="signup" className="space-y-4">
-                  <form onSubmit={(e) => handleAuth(e, 'signup')} className="space-y-4">
+                  <form onSubmit={handleRegister} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="first-name" className="text-sm text-muted-foreground">First Name</Label>
                       <Input
                         id="first-name"
                         type="text"
-                        placeholder=""
+                        placeholder="John"
+                        value={formData.firstName}
+                        onChange={(e) => handleInputChange('firstName', e.target.value)}
                         required
                       />
                     </div>
@@ -118,7 +168,9 @@ const Auth = () => {
                       <Input
                         id="last-name"
                         type="text"
-                        placeholder=""
+                        placeholder="Doe"
+                        value={formData.lastName}
+                        onChange={(e) => handleInputChange('lastName', e.target.value)}
                         required
                       />
                     </div>
@@ -127,7 +179,9 @@ const Auth = () => {
                       <Input
                         id="signup-email"
                         type="email"
-                        placeholder=""
+                        placeholder="john@example.com"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
                         required
                       />
                     </div>
@@ -136,8 +190,11 @@ const Auth = () => {
                       <Input
                         id="signup-password"
                         type="password"
-                        placeholder=""
+                        placeholder="Min 6 characters"
+                        value={formData.password}
+                        onChange={(e) => handleInputChange('password', e.target.value)}
                         required
+                        minLength={6}
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -149,9 +206,9 @@ const Auth = () => {
                     <Button 
                       type="submit" 
                       className="w-full bg-muted text-muted-foreground"
-                      disabled={isLoading}
+                      disabled={loading}
                     >
-                      {isLoading ? "Creating account..." : "Create an account"}
+                      {loading ? "Creating account..." : "Create an account"}
                     </Button>
                   </form>
                 </TabsContent>
