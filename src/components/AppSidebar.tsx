@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useTheme } from "next-themes";
 import { 
   Folder, 
   CheckSquare, 
@@ -33,15 +33,14 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const currentPath = location.pathname;
-  const [isDark, setIsDark] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50";
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
-    // Add theme toggle logic here
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -79,7 +78,7 @@ export function AppSidebar() {
               onClick={toggleTheme}
               className="w-8 h-8"
             >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             {!collapsed && (
               <Button variant="ghost" size="icon" className="w-8 h-8">
