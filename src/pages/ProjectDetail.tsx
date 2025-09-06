@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, MessageSquare, Users, Calendar, MoreHorizontal } from "lucide-react";
+import { Layout } from "@/components/Layout";
 import { TaskBoard } from "@/components/TaskBoard";
 import { ProjectDiscussion } from "@/components/ProjectDiscussion";
 import { TeamMembers } from "@/components/TeamMembers";
@@ -68,37 +69,49 @@ const ProjectDetail = () => {
   const completedTasks = project.tasks.done.length;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold">{project.name}</h1>
-                <p className="text-sm text-muted-foreground">{project.description}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Badge className={getStatusColor(project.status)}>
-                {project.status}
-              </Badge>
-              <Button className="bg-gradient-primary text-primary-foreground border-0">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Task
-              </Button>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-5 w-5" />
-              </Button>
+    <Layout>
+      <div className="container mx-auto px-6 py-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/dashboard")}
+            className="p-0 h-auto"
+          >
+            Projects
+          </Button>
+          <span>&gt;</span>
+          <span>{project.name}</span>
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">{project.name}</h1>
+              <p className="text-muted-foreground">{project.description}</p>
             </div>
           </div>
+          <div className="flex items-center space-x-4">
+            <Badge className={getStatusColor(project.status)}>
+              {project.status}
+            </Badge>
+            <Button 
+              className="bg-gradient-primary text-primary-foreground border-0"
+              onClick={() => navigate("/create-task")}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Task
+            </Button>
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
         {/* Project Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -186,7 +199,7 @@ const ProjectDetail = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </Layout>
   );
 };
 

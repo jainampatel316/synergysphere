@@ -1,0 +1,107 @@
+import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { 
+  Folder, 
+  CheckSquare, 
+  Settings, 
+  Sun, 
+  Moon,
+  User
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+const navigation = [
+  { title: "Projects", url: "/dashboard", icon: Folder },
+  { title: "My Tasks", url: "/my-tasks", icon: CheckSquare },
+];
+
+export function AppSidebar() {
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const [isDark, setIsDark] = useState(false);
+
+  const isActive = (path: string) => currentPath === path;
+  const getNavCls = ({ isActive }: { isActive: boolean }) =>
+    isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50";
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    // Add theme toggle logic here
+  };
+
+  return (
+    <Sidebar
+      className={collapsed ? "w-14" : "w-60"}
+      collapsible="icon"
+    >
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel className={collapsed ? "hidden" : "block"}>
+            Company
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigation.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} end className={getNavCls}>
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Theme Toggle and User Profile */}
+        <div className="mt-auto p-4 space-y-2">
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost" 
+              size="icon"
+              onClick={toggleTheme}
+              className="w-8 h-8"
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            {!collapsed && (
+              <Button variant="ghost" size="icon" className="w-8 h-8">
+                <Settings className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50">
+            <Avatar className="w-8 h-8">
+              <AvatarImage src="" />
+              <AvatarFallback className="text-xs">TU</AvatarFallback>
+            </Avatar>
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">Test User</p>
+                <p className="text-xs text-muted-foreground truncate">user@email</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </SidebarContent>
+    </Sidebar>
+  );
+}
