@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
+  const navigate = useNavigate();
+  
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -32,6 +35,13 @@ export function Layout({ children }: LayoutProps) {
               </div>
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate('/settings')}
+              >
+                <Settings className="h-5 w-5" />
               </Button>
             </div>
           </header>
