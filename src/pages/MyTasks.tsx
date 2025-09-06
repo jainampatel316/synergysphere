@@ -39,11 +39,11 @@ const mockTasks = [
   },
   {
     id: "3",
-    title: "Write API documentation",
-    project: "Backend Services",
+    title: "Write component documentation",
+    project: "Frontend Services",
     tags: [
       { label: "Documentation", color: "green" },
-      { label: "API", color: "green" }
+      { label: "Components", color: "green" }
     ],
     image: "/placeholder-task.jpg",
     deadline: "25/01/22",

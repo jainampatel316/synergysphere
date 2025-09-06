@@ -83,7 +83,7 @@ export function AppSidebar() {
 
         {/* Theme Toggle and User Profile */}
         <div className={`mt-auto p-2 space-y-2 ${collapsed ? "flex flex-col items-center" : ""}`}>
-          <div className={`flex ${collapsed ? "flex-col space-y-2" : "items-center space-x-2"}`}>
+          <div className={`flex ${collapsed ? "justify-center" : "items-center space-x-2"}`}>
             <Button
               variant="ghost" 
               size="icon"
@@ -92,28 +92,12 @@ export function AppSidebar() {
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            {!collapsed && (
-              <Button variant="ghost" size="icon" className="w-8 h-8">
-                <Settings className="h-4 w-4" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              className="w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-              title="Logout"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-            {collapsed && (
-              <Button variant="ghost" size="icon" className="w-8 h-8">
-                <Settings className="h-4 w-4" />
-              </Button>
-            )}
           </div>
           
-          <div className={`flex ${collapsed ? "justify-center" : "items-center space-x-2"} p-2 rounded-lg hover:bg-muted/50`}>
+          <div 
+            className={`flex ${collapsed ? "justify-center" : "items-center space-x-2"} p-2 rounded-lg hover:bg-muted/50 cursor-pointer`}
+            onClick={() => navigate('/profile')}
+          >
             <Avatar className="w-8 h-8">
               <AvatarImage src="" />
               <AvatarFallback className="text-xs">TU</AvatarFallback>
@@ -124,7 +108,33 @@ export function AppSidebar() {
                 <p className="text-xs text-muted-foreground truncate">user@email</p>
               </div>
             )}
+            {!collapsed && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLogout();
+                }}
+                className="w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            )}
           </div>
+          
+          {collapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="w-8 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </SidebarContent>
     </Sidebar>
